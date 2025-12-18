@@ -13,7 +13,6 @@ st.title("🛒 Market Basket Analysis – Apriori Algorithm")
 # USER INPUT
 # ===============================
 st.subheader("✍️ Enter Transactions")
-
 st.info("Enter one shopping cart per line (items separated by commas)")
 
 user_input = st.text_area(
@@ -22,11 +21,11 @@ user_input = st.text_area(
 )
 
 if user_input:
+
     # ===============================
     # Create INSTANCES
     # ===============================
     transactions = []
-
     for line in user_input.strip().split("\n"):
         transactions.append([item.strip() for item in line.split(",")])
 
@@ -49,13 +48,11 @@ if user_input:
     st.sidebar.header("⚙️ Apriori Parameters")
 
     min_support = st.sidebar.slider(
-        "Minimum Support",
-        0.01, 1.0, 0.3, 0.01
+        "Minimum Support", 0.01, 1.0, 0.3, 0.01
     )
 
     min_confidence = st.sidebar.slider(
-        "Minimum Confidence",
-        0.01, 1.0, 0.6, 0.01
+        "Minimum Confidence", 0.01, 1.0, 0.6, 0.01
     )
 
     # ===============================
@@ -68,6 +65,7 @@ if user_input:
     )
 
     if not frequent_items.empty:
+
         frequent_items["items"] = frequent_items["itemsets"].apply(
             lambda x: ", ".join(list(x))
         )
@@ -84,4 +82,9 @@ if user_input:
             min_threshold=min_confidence
         )
 
-        if not rules.emp
+        if not rules.empty:
+
+            rules["antecedents"] = rules["antecedents"].apply(
+                lambda x: ", ".join(list(x))
+            )
+            rules["consequents"]()
