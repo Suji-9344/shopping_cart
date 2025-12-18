@@ -1,90 +1,103 @@
 import streamlit as st
 import pandas as pd
-import matplotlib.pyplot as plt
-
 from mlxtend.preprocessing import TransactionEncoder
 from mlxtend.frequent_patterns import apriori, association_rules
+import matplotlib.pyplot as plt
 
-st.set_page_config(page_title="Apriori Algorithm App", layout="wide")
+st.set_page_config(page_title="Apriori Algorithm", layout="centered")
+st.title("🛒 Market Basket Analysis (Apriori)")
 
-st.title("🛒 Market Basket Analysis – Apriori Algorithm")
+st.write("### Enter transactions (one cart per line)")
+st.caption("Items must be separated by commas")
 
-# ===============================
+# -------------------------------
 # USER INPUT
-# ===============================
-st.subheader("✍️ Enter Transactions")
-st.info("Enter one shopping cart per line (items separated by commas)")
-
-user_input = st.text_area(
+# -------------------------------
+data = st.text_area(
     "Example:\nMilk,Bread,Butter\nBread,Jam\nMilk,Bread",
-    height=200
+    height=180
 )
 
-if user_input:
+# -------------------------------
+# PARAMETERS
+# -------------------------------
+min_support = st.slider("Minimum Support", 0.1, 1.0, 0.3)
+min_confidence = st.slider("Minimum Confidence", 0.1, 1.0, 0.6)
 
-    # ===============================
-    # Create INSTANCES
-    # ===============================
-    transactions = []
-    for line in user_input.strip().split("\n"):
-        transactions.append([item.strip() for item in line.split(",")])
+# -------------------------------
+# PROCESS BUTTON
+# -------------------------------
+if st.button("Run Apriori Algorithm"):
 
-    st.subheader("🧩 Transaction Instances")
+    if not data.strip():
+        st.error("❌ Please enter at least one transaction")
+        st.stop()
+
+    # -------------------------------
+    # CREATE TRANSACTIONS
+    # -------------------------------
+    transactions = [
+        [item.strip() for item in row.split(",") if item.strip()]
+        for row in data.strip().split("\n")
+    ]
+
+    st.success("✅ Transactions created")
     st.write(transactions)
 
-    # ===============================
-    # Encoding
-    # ===============================
+    # -------------------------------
+    # ENCODING
+    # -------------------------------
     te = TransactionEncoder()
-    te_array = te.fit(transactions).transform(transactions)
-    encoded_df = pd.DataFrame(te_array, columns=te.columns_)
+    encoded_array = te.fit(transactions).transform(transactions)
+    encoded_df = pd.DataFrame(encoded_array, columns=te.columns_)
 
-    st.subheader("🔐 Encoded Data")
+    st.write("### 🔐 Encoded Data")
     st.dataframe(encoded_df)
 
-    # ===============================
-    # Apriori Parameters
-    # ===============================
-    st.sidebar.header("⚙️ Apriori Parameters")
-
-    min_support = st.sidebar.slider(
-        "Minimum Support", 0.01, 1.0, 0.3, 0.01
-    )
-
-    min_confidence = st.sidebar.slider(
-        "Minimum Confidence", 0.01, 1.0, 0.6, 0.01
-    )
-
-    # ===============================
-    # Apply Apriori
-    # ===============================
-    frequent_items = apriori(
+    # -------------------------------
+    # APRIORI
+    # -------------------------------
+    frequent_itemsets = apriori(
         encoded_df,
         min_support=min_support,
         use_colnames=True
     )
 
-    if not frequent_items.empty:
+    if frequent_itemsets.empty:
+        st.warning("⚠️ No frequent itemsets found")
+        st.stop()
 
-        frequent_items["items"] = frequent_items["itemsets"].apply(
-            lambda x: ", ".join(list(x))
-        )
+    frequent_itemsets["items"] = frequent_itemsets["itemsets"].apply(
+        lambda x: ", ".join(x)
+    )
 
-        st.subheader("📊 Frequent Itemsets")
-        st.dataframe(frequent_items[["items", "support"]])
+    st.write("### 📊 Frequent Itemsets")
+    st.dataframe(frequent_itemsets[["items", "support"]])
 
-        # ===============================
-        # Association Rules
-        # ===============================
-        rules = association_rules(
-            frequent_items,
-            metric="confidence",
-            min_threshold=min_confidence
-        )
+    # -------------------------------
+    # ASSOCIATION RULES
+    # -------------------------------
+    rules = association_rules(
+        frequent_itemsets,
+        metric="confidence",
+        min_threshold=min_confidence
+    )
 
-        if not rules.empty:
+    if rules.empty:
+        st.warning("⚠️ No association rules found")
+        st.stop()
 
-            rules["antecedents"] = rules["antecedents"].apply(
-                lambda x: ", ".join(list(x))
-            )
-            rules["consequents"]()
+    rules["antecedents"] = rules["antecedents"].apply(lambda x: ", ".join(x))
+    rules["consequents"] = rules["consequents"].apply(lambda x: ", ".join(x))
+
+    st.write("### 🔗 Association Rules")
+    st.dataframe(
+        rules[["antecedents", "consequents", "support", "confidence", "lift"]]
+    )
+
+    # -------------------------------
+    # PLOT
+    # -------------------------------
+    st.write("### 📈 Support Plot")
+    fig = plt.figure()
+    plt.bar(frequent_itemsets["items"]_
