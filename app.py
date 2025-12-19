@@ -3,8 +3,8 @@ import pandas as pd
 from mlxtend.preprocessing import TransactionEncoder
 from mlxtend.frequent_patterns import apriori, association_rules
 
-st.set_page_config(page_title="Apriori Algorithm", layout="centered")
-st.title("🛒 Market Basket Analysis (Apriori)")
+st.set_page_config(page_title="Apriori Max Confidence", layout="centered")
+st.title("🛒 Apriori Algorithm - Max Confidence Rule")
 
 st.write("Enter transactions (one cart per line). Items separated by commas.")
 
@@ -20,7 +20,6 @@ data = st.text_area(
 # PARAMETERS
 # -------------------------------
 min_support = st.slider("Minimum Support", 0.1, 1.0, 0.3)
-min_confidence = st.slider("Minimum Confidence", 0.1, 1.0, 0.6)
 
 # -------------------------------
 # PROCESS BUTTON
@@ -40,7 +39,6 @@ if st.button("Run Apriori"):
     ]
 
     st.success("✅ Transactions created")
-    st.write("Transactions:", transactions)
 
     # -------------------------------
     # ENCODING
@@ -48,9 +46,6 @@ if st.button("Run Apriori"):
     te = TransactionEncoder()
     encoded_array = te.fit(transactions).transform(transactions)
     encoded_df = pd.DataFrame(encoded_array, columns=te.columns_)
-
-    st.write("### 🔐 Encoded Data")
-    st.dataframe(encoded_df)
 
     # -------------------------------
     # APRIORI
@@ -65,21 +60,10 @@ if st.button("Run Apriori"):
         st.warning("⚠️ No frequent itemsets found")
         st.stop()
 
-    # Add readable itemsets column
-    frequent_itemsets["items"] = frequent_itemsets["itemsets"].apply(lambda x: ", ".join(x))
-
-    st.write("### 📊 Frequent Itemsets with Support")
-    st.dataframe(frequent_itemsets[["items", "support"]])
-
     # -------------------------------
-    # ASSOCIATION RULES (Support + Confidence)
+    # ASSOCIATION RULES
     # -------------------------------
-    rules = association_rules(
-        frequent_itemsets,
-        metric="confidence",
-        min_threshold=min_confidence
-    )
-
+    rules = association_rules(frequent_itemsets, metric="confidence", min_threshold=0.0)
     if rules.empty:
         st.warning("⚠️ No association rules found")
         st.stop()
@@ -88,4 +72,9 @@ if st.button("Run Apriori"):
     rules["antecedents"] = rules["antecedents"].apply(lambda x: ", ".join(x))
     rules["consequents"] = rules["consequents"].apply(lambda x: ", ".join(x))
 
-    st.write("### 🔗 Association Rules")
+    # Find rule(s) with maximum confidence
+    max_conf = rules["confidence"].max()
+    max_rules = rules[rules["confidence"] == max_conf]
+
+    st.subheader("🔝 Rule(s) with Maximum Confidence")
+    st.dataframe(max_rules[["antecedents", "consequents", "support", "confidence", "lift"]])
