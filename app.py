@@ -96,8 +96,14 @@ if st.button("Run Apriori Algorithm"):
     )
 
     # -------------------------------
-    # PLOT
+    # PLOT SUPPORT
     # -------------------------------
-    st.write("### 📈 Support Plot")
-    fig = plt.figure()
-    plt.bar(frequent_itemsets["items"]_
+    st.write("### 📈 Frequent Itemsets Support Plot")
+    fig, ax = plt.subplots()
+    ax.bar(frequent_itemsets["items"], frequent_itemsets["support"], color="skyblue")
+    ax.set_xlabel("Itemsets")
+    ax.set_ylabel("Support")
+    ax.set_title("Frequent Itemsets Support")
+    plt.xticks(rotation=45, ha="right")
+    st.pyplot(fig)
+z
