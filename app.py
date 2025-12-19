@@ -106,4 +106,4 @@ if st.button("Run Apriori Algorithm"):
     ax.set_title("Frequent Itemsets Support")
     plt.xticks(rotation=45, ha="right")
     st.pyplot(fig)
-z
+
