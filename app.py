@@ -88,4 +88,4 @@ if st.button("Run Apriori"):
     rules["antecedents"] = rules["antecedents"].apply(lambda x: ", ".join(x))
     rules["consequents"] = rules["consequents"].apply(lambda x: ", ".join(x))
 
-    st.write("### 🔗 Association Rules
+    st.write("### 🔗 Association Rules")
