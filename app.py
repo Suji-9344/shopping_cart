@@ -2,13 +2,11 @@ import streamlit as st
 import pandas as pd
 from mlxtend.preprocessing import TransactionEncoder
 from mlxtend.frequent_patterns import apriori, association_rules
-import matplotlib.pyplot as plt
 
 st.set_page_config(page_title="Apriori Algorithm", layout="centered")
 st.title("🛒 Market Basket Analysis (Apriori)")
 
-st.write("### Enter transactions (one cart per line)")
-st.caption("Items must be separated by commas")
+st.write("Enter transactions (one cart per line). Items separated by commas.")
 
 # -------------------------------
 # USER INPUT
@@ -27,7 +25,7 @@ min_confidence = st.slider("Minimum Confidence", 0.1, 1.0, 0.6)
 # -------------------------------
 # PROCESS BUTTON
 # -------------------------------
-if st.button("Run Apriori Algorithm"):
+if st.button("Run Apriori"):
 
     if not data.strip():
         st.error("❌ Please enter at least one transaction")
@@ -42,7 +40,7 @@ if st.button("Run Apriori Algorithm"):
     ]
 
     st.success("✅ Transactions created")
-    st.write(transactions)
+    st.write("Transactions:", transactions)
 
     # -------------------------------
     # ENCODING
@@ -67,15 +65,14 @@ if st.button("Run Apriori Algorithm"):
         st.warning("⚠️ No frequent itemsets found")
         st.stop()
 
-    frequent_itemsets["items"] = frequent_itemsets["itemsets"].apply(
-        lambda x: ", ".join(x)
-    )
+    # Add readable itemsets column
+    frequent_itemsets["items"] = frequent_itemsets["itemsets"].apply(lambda x: ", ".join(x))
 
-    st.write("### 📊 Frequent Itemsets")
+    st.write("### 📊 Frequent Itemsets with Support")
     st.dataframe(frequent_itemsets[["items", "support"]])
 
     # -------------------------------
-    # ASSOCIATION RULES
+    # ASSOCIATION RULES (Support + Confidence)
     # -------------------------------
     rules = association_rules(
         frequent_itemsets,
@@ -87,23 +84,8 @@ if st.button("Run Apriori Algorithm"):
         st.warning("⚠️ No association rules found")
         st.stop()
 
+    # Convert sets to string
     rules["antecedents"] = rules["antecedents"].apply(lambda x: ", ".join(x))
     rules["consequents"] = rules["consequents"].apply(lambda x: ", ".join(x))
 
-    st.write("### 🔗 Association Rules")
-    st.dataframe(
-        rules[["antecedents", "consequents", "support", "confidence", "lift"]]
-    )
-
-    # -------------------------------
-    # PLOT SUPPORT
-    # -------------------------------
-    st.write("### 📈 Frequent Itemsets Support Plot")
-    fig, ax = plt.subplots()
-    ax.bar(frequent_itemsets["items"], frequent_itemsets["support"], color="skyblue")
-    ax.set_xlabel("Itemsets")
-    ax.set_ylabel("Support")
-    ax.set_title("Frequent Itemsets Support")
-    plt.xticks(rotation=45, ha="right")
-    st.pyplot(fig)
-
+    st.write("### 🔗 Association Rules
