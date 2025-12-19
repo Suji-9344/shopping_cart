@@ -57,7 +57,7 @@ if st.button("Run Apriori"):
     )
 
     if frequent_itemsets.empty:
-        st.warning("⚠️ No frequent itemsets found")
+        st.warning("⚠️ No frequent itemsets found for this support level")
         st.stop()
 
     # -------------------------------
@@ -68,7 +68,7 @@ if st.button("Run Apriori"):
         st.warning("⚠️ No association rules found")
         st.stop()
 
-    # Convert sets to string
+    # Convert sets to string for display
     rules["antecedents"] = rules["antecedents"].apply(lambda x: ", ".join(x))
     rules["consequents"] = rules["consequents"].apply(lambda x: ", ".join(x))
 
